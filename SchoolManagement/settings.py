@@ -25,7 +25,7 @@ SECRET_KEY = 'x7_qht-mr6311ez(zr0_clgjb9xct_*&iso#fk5bx6(kf#08=f'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'school_management_system',
     'import_export',
+    'rest_framework',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +80,12 @@ WSGI_APPLICATION = 'SchoolManagement.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'school',
+        'USER': 'raj',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': 3306,
     }
 }
 

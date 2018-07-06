@@ -15,7 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework import routers
+from rest_framework_swagger.views import get_swagger_view
+from school_management_system.views import StudentView
 
+# Setting the URL student/ with all the HTTP methods
+router = routers.DefaultRouter()
+router.register(r'student', StudentView)
+
+# Setting other URLs
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('docs/', get_swagger_view(title='School Management System')),
 ]
+urlpatterns += router.urls
