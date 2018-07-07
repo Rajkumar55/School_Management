@@ -26,6 +26,6 @@ router.register(r'student', StudentView)
 # Setting other URLs
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('docs/', get_swagger_view(title='School Management System')),
+    path('docs/', get_swagger_view(title='School Management System')),  # API Docs URL
 ]
 urlpatterns += router.urls

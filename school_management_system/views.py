@@ -1,8 +1,10 @@
 import json
-from rest_framework import viewsets
+from django.http.response import Http404
+from rest_framework import viewsets, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-
-from school_management_system.models import Student, School
+from rest_framework.serializers import as_serializer_error
+from school_management_system.models import Student
 from school_management_system.serializers import StudentSerializer
 
 
@@ -15,7 +17,7 @@ class StudentView(viewsets.ModelViewSet):
         List all students
 
         # URL
-            GET - http://localhost/student/
+            GET - http://localhost:8000/student/
 
         # Sample Response
             {
@@ -42,15 +44,16 @@ class StudentView(viewsets.ModelViewSet):
                 ]
             }
         """
-        serializer = StudentSerializer(self.queryset, many=True)
-        return Response({'status': 'success', 'data': serializer.data})
+        students = Student.objects.all()
+        serializer = StudentSerializer(students, many=True)
+        return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         """
         Add a new student
 
         # URL
-            POST - http://localhost/student/
+            POST - http://localhost:8000/student/
 
         # Sample Request
             {
@@ -75,21 +78,30 @@ class StudentView(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             response = {'status': 'success', 'message': 'Saved successfully'}
+            status_code = status.HTTP_201_CREATED
 
-        except School.DoesNotExist as se:
-            response = {'status': 'fail', 'message': str(se)}
+        except ValueError as ve:
+            response = {'status': 'fail', 'message': str(ve)}
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        except ValidationError as vve:
+            error = list(as_serializer_error(vve).keys())
+            error_message = '{} are invalid'.format(', '.join(error))
+            response = {'status': 'fail', 'message': error_message}
+            status_code = status.HTTP_400_BAD_REQUEST
 
         except Exception as e:
             response = {'status': 'fail', 'message': str(e)}
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return Response(response)
+        return Response(response, status=status_code)
 
     def update(self, request, *args, **kwargs):
         """
         Update student details
 
         # URL
-            PUT - http://localhost/student/1/
+            PUT - http://localhost:8000/student/1/
 
         # Sample Request
             {
@@ -115,21 +127,34 @@ class StudentView(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             response = {'status': 'success', 'message': 'Updated successfully'}
+            status_code = status.HTTP_200_OK
 
-        except School.DoesNotExist as se:
-            response = {'status': 'fail', 'message': str(se)}
+        except ValueError as ve:
+            response = {'status': 'fail', 'message': str(ve)}
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        except ValidationError as vve:
+            error = list(as_serializer_error(vve).keys())
+            error_message = '{} are invalid'.format(', '.join(error))
+            response = {'status': 'fail', 'message': error_message}
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        except Http404:
+            response = {'status': 'fail', 'message': 'Student ID is invalid'}
+            status_code = status.HTTP_404_NOT_FOUND
 
         except Exception as e:
             response = {'status': 'fail', 'message': str(e)}
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return Response(response)
+        return Response(response, status=status_code)
 
     def destroy(self, request, *args, **kwargs):
         """
         Delete student
 
         # URL
-            DELETE - http://localhost/student/1/
+            DELETE - http://localhost:8000/student/1/
 
         # Sample Response
             {
@@ -138,11 +163,18 @@ class StudentView(viewsets.ModelViewSet):
             }
         """
         try:
-            instance = self.get_object()
-            self.perform_destroy(instance)
+            super(StudentView, self).destroy(request)
+            # instance = self.get_object()
+            # self.perform_destroy(instance)
             response = {'status': 'success', 'message': 'Deleted Successfully'}
+            status_code = status.HTTP_200_OK
+
+        except Http404:
+            response = {'status': 'fail', 'message': 'Student ID not available'}
+            status_code = status.HTTP_404_NOT_FOUND
 
         except Exception as e:
-            response = {'status': 'fail', 'message': 'Student ID invalid'}
+            response = {'status': 'fail', 'message': str(e)}
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return Response(response)
+        return Response(response, status=status_code)
