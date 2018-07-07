@@ -1,4 +1,6 @@
 import json
+
+from django.db import IntegrityError
 from django.http.response import Http404
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
@@ -90,6 +92,10 @@ class StudentView(viewsets.ModelViewSet):
             response = {'status': 'fail', 'message': error_message}
             status_code = status.HTTP_400_BAD_REQUEST
 
+        except IntegrityError:
+            response = {'status': 'fail', 'message': 'Admission number is already available'}
+            status_code = status.HTTP_400_BAD_REQUEST
+
         except Exception as e:
             response = {'status': 'fail', 'message': str(e)}
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -137,6 +143,10 @@ class StudentView(viewsets.ModelViewSet):
             error = list(as_serializer_error(vve).keys())
             error_message = '{} are invalid'.format(', '.join(error))
             response = {'status': 'fail', 'message': error_message}
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        except IntegrityError:
+            response = {'status': 'fail', 'message': 'Admission number is already available'}
             status_code = status.HTTP_400_BAD_REQUEST
 
         except Http404:

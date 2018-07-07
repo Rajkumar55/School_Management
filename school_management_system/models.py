@@ -18,7 +18,7 @@ class School(models.Model):
 
 class Student(models.Model):
     student_name = models.CharField(max_length=100, null=False, blank=False)
-    admission_number = models.IntegerField(null=False, blank=False)
+    admission_number = models.IntegerField(null=False, blank=False, unique=True)
     address = models.TextField(null=False, blank=False)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False)
     class_number = models.IntegerField(null=False, blank=False, help_text='In which class the student is enrolled')
