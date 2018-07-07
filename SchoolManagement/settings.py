@@ -129,3 +129,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+REST_FRAMEWORK = {'EXCEPTION_HANDLER': 'school_management_system.exception_handler.custom_exception_handler'}
